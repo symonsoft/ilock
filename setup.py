@@ -1,15 +1,15 @@
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(
     name='ilock',
     packages=['ilock'],
-    version='1.0',
+    version='1.0.1',
     description='Inter-process named lock library',
     author='SymonSoft',
     author_email='symonsoft@gmail.com',
     url='https://github.com/symonsoft/ilock',
-    download_url='https://github.com/symonsoft/ilock/tarball/1.0',
+    download_url='https://github.com/symonsoft/ilock/tarball/1.0.1',
     keywords=['interprocess', 'multiprocessing', 'lock', 'mutex', 'os-independent'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -23,8 +23,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Topic :: Software Development :: Debuggers',
         'Topic :: Utilities'
     ],
-    requires=['portalocker']
+    install_requires=['portalocker']
 )

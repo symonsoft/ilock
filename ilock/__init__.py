@@ -33,7 +33,7 @@ class ILock(object):
             raise ILockException('Trying re-enter a non-reentrant lock')
 
         current_time = call_time = time()
-        while call_time + self._timeout > current_time:
+        while call_time + self._timeout >= current_time:
             self._lockfile = open(self._filepath, 'w')
             try:
                 portalocker.lock(self._lockfile, portalocker.constants.LOCK_NB | portalocker.constants.LOCK_EX)

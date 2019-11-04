@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='ilock',
     packages=['ilock'],
-    version='1.0.2',
+    version='1.0.3',
     description='Inter-process named lock library',
     author='SymonSoft',
     author_email='symonsoft@gmail.com',

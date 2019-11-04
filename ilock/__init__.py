@@ -54,7 +54,7 @@ class ILock(object):
         if self._enter_count > 0:
             return
 
-        if sys.platform == 'linux2':
+        if sys.platform.startswith('linux'):
             # In Linux you can delete a locked file
             os.unlink(self._filepath)
 

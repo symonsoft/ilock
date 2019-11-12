@@ -1,15 +1,17 @@
 from setuptools import setup
 
+version = '1.0.3'
 
 setup(
     name='ilock',
     packages=['ilock'],
-    version='1.0.3',
+    version=version,
     description='Inter-process named lock library',
     author='SymonSoft',
     author_email='symonsoft@gmail.com',
     url='https://github.com/symonsoft/ilock',
-    download_url='https://github.com/symonsoft/ilock/tarball/1.0.2',
+    download_url='https://github.com/symonsoft/ilock/tarball/{0}'.format(
+        version),
     keywords=['interprocess', 'multiprocessing', 'lock', 'mutex', 'os-independent'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',

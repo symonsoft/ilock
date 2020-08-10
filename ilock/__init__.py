@@ -54,18 +54,16 @@ class ILock(object):
         if self._enter_count > 0:
             return
 
-        if sys.platform.startswith('linux'):
-            # In Linux you can delete a locked file
-            os.unlink(self._filepath)
-
         self._lockfile.close()
 
-        if sys.platform == 'win32':
-            # In Windows you need to unlock a file before deletion
-            try:
-                os.remove(self._filepath)
-            except WindowsError as e:
-                # Mute exception in case an access was already acquired (EACCES)
-                #  and in more rare case when it was even already released and file was deleted (ENOENT)
-                if e.errno not in [errno.EACCES, errno.ENOENT]:
-                    raise
+        try:
+            os.unlink(self._filepath)
+        except WindowsError as e:
+            # Mute exception in case an access was already acquired (EACCES)
+            #  and in more rare case when it was even already released and file was deleted (ENOENT)
+            if e.errno not in [errno.EACCES, errno.ENOENT]:
+                raise
+        except FileNotFoundError:
+            # the file may already removed from another process.
+            # https://github.com/symonsoft/ilock/issues/4
+            pass

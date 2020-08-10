@@ -83,7 +83,8 @@ class ILock(object):
     if sys.version_info >= (3, 5):
         import asyncio
 
-        async def __aenter__(self):
+        @asyncio.coroutine
+        def __aenter__(self):
             if self._try_reentrant():
                 return self
 
@@ -94,9 +95,10 @@ class ILock(object):
 
                 current_time = time()
                 check_interval = self._check_interval if self._timeout > self._check_interval else self._timeout
-                await asyncio.sleep(check_interval)
+                yield from asyncio.sleep(check_interval)
 
             raise ILockException('Timeout was reached')
 
-        async def __aexit__(self, *excinfo):
+        @asyncio.coroutine
+        def __aexit__(self, *excinfo):
             self.__exit__(*excinfo)

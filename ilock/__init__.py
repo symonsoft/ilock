@@ -25,22 +25,32 @@ class ILock(object):
 
         self._enter_count = 0
 
-    def __enter__(self):
+    def _try_reentrant(self):
         if self._enter_count > 0:
             if self._reentrant:
                 self._enter_count += 1
-                return self
+                return True
             raise ILockException('Trying re-enter a non-reentrant lock')
+        return False
+
+    def _try_lockfile(self):
+        self._lockfile = open(self._filepath, 'w')
+        try:
+            portalocker.lock(self._lockfile, portalocker.constants.LOCK_NB | portalocker.constants.LOCK_EX)
+            self._enter_count = 1
+            return True
+        except portalocker.exceptions.LockException:
+            pass
+        return False
+
+    def __enter__(self):
+        if self._try_reentrant():
+            return self
 
         current_time = call_time = time()
         while call_time + self._timeout >= current_time:
-            self._lockfile = open(self._filepath, 'w')
-            try:
-                portalocker.lock(self._lockfile, portalocker.constants.LOCK_NB | portalocker.constants.LOCK_EX)
-                self._enter_count = 1
+            if self._try_lockfile():
                 return self
-            except portalocker.exceptions.LockException:
-                pass
 
             current_time = time()
             check_interval = self._check_interval if self._timeout > self._check_interval else self._timeout
@@ -69,3 +79,24 @@ class ILock(object):
                 #  and in more rare case when it was even already released and file was deleted (ENOENT)
                 if e.errno not in [errno.EACCES, errno.ENOENT]:
                     raise
+
+    if sys.version_info >= (3, 5):
+        import asyncio
+
+        async def __aenter__(self):
+            if self._try_reentrant():
+                return self
+
+            current_time = call_time = time()
+            while call_time + self._timeout >= current_time:
+                if self._try_lockfile():
+                    return self
+
+                current_time = time()
+                check_interval = self._check_interval if self._timeout > self._check_interval else self._timeout
+                await asyncio.sleep(check_interval)
+
+            raise ILockException('Timeout was reached')
+
+        async def __aexit__(self, *excinfo):
+            self.__exit__(*excinfo)

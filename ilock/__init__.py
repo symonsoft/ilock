@@ -34,12 +34,14 @@ class ILock(object):
 
         current_time = call_time = time()
         while call_time + self._timeout >= current_time:
-            self._lockfile = open(self._filepath, 'w')
             try:
+                self._lockfile = open(self._filepath, 'w')
                 portalocker.lock(self._lockfile, portalocker.constants.LOCK_NB | portalocker.constants.LOCK_EX)
                 self._enter_count = 1
                 return self
             except portalocker.exceptions.LockException:
+                pass
+            except PermissionError:
                 pass
 
             current_time = time()
@@ -56,7 +58,10 @@ class ILock(object):
 
         if sys.platform.startswith('linux'):
             # In Linux you can delete a locked file
-            os.unlink(self._filepath)
+            try:
+                os.unlink(self._filepath)
+            except FileNotFoundError:
+                pass
 
         self._lockfile.close()
 

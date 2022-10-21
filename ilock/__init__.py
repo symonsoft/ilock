@@ -7,7 +7,9 @@ from time import time, sleep
 
 import portalocker
 
+#linux memory file directory, for better performance
 MEMORY_FILE_DIRECTORY = '/dev/shm/'
+TEMP_DIR = MEMORY_FILE_DIRECTORY if os.path.isdir(MEMORY_FILE_DIRECTORY) else gettempdir()
 
 class ILockException(Exception):
     pass
@@ -18,10 +20,7 @@ class ILock(object):
         self._timeout = timeout if timeout is not None else 10 ** 8
         self._check_interval = check_interval
 
-        if lock_directory is None and os.path.isdir(MEMORY_FILE_DIRECTORY):
-            lock_directory = MEMORY_FILE_DIRECTORY
-        else:
-            lock_directory = gettempdir() if lock_directory is None else lock_directory
+        lock_directory = TEMP_DIR if lock_directory is None else lock_directory
         unique_token = sha256(name.encode()).hexdigest()
         self._filepath = os.path.join(lock_directory, 'ilock-' + unique_token + '.lock')
 

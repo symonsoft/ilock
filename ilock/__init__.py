@@ -58,8 +58,12 @@ class ILock(object):
             return
 
         if sys.platform.startswith('linux'):
-            # In Linux you can delete a locked file
-            os.unlink(self._filepath)
+            try:
+                # In Linux you can delete a locked file
+                os.unlink(self._filepath)
+            except FileNotFoundError:
+                # this can happen very rarely
+                pass
 
         self._lockfile.close()
 

@@ -7,6 +7,9 @@ from time import time, sleep
 
 import portalocker
 
+#linux memory file directory, for better performance
+MEMORY_FILE_DIRECTORY = '/dev/shm/'
+TEMP_DIR = MEMORY_FILE_DIRECTORY if os.path.isdir(MEMORY_FILE_DIRECTORY) else gettempdir()
 
 class ILockException(Exception):
     pass
@@ -17,7 +20,7 @@ class ILock(object):
         self._timeout = timeout if timeout is not None else 10 ** 8
         self._check_interval = check_interval
 
-        lock_directory = gettempdir() if lock_directory is None else lock_directory
+        lock_directory = TEMP_DIR if lock_directory is None else lock_directory
         unique_token = sha256(name.encode()).hexdigest()
         self._filepath = os.path.join(lock_directory, 'ilock-' + unique_token + '.lock')
 
@@ -55,8 +58,12 @@ class ILock(object):
             return
 
         if sys.platform.startswith('linux'):
-            # In Linux you can delete a locked file
-            os.unlink(self._filepath)
+            try:
+                # In Linux you can delete a locked file
+                os.unlink(self._filepath)
+            except FileNotFoundError:
+                # this can happen very rarely
+                pass
 
         self._lockfile.close()
 

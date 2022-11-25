@@ -1,4 +1,4 @@
-# ilock v.1.0.3
+# ilock v.1.0.4
 
 
 ## About
@@ -61,6 +61,12 @@ with lock:
     foo()
     ...
 ```
+
+### changelog:
+v.1.0.4:
+> Minor performance improvement for linux OS:
+
+> ```when no file location is set, it will use by default the OS memory directory structure```
 
 
 ## License
